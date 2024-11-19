@@ -1,0 +1,106 @@
+== Eclipse Compiler issue with JEP 247 and JRE
+
+This project demonstrates a NullPointerException using the Eclipse Compiler with `--release` and a JRE.
+
+== Building
+
+To build the project, clone this repository and run the following:
+
+[source,shell]
+----
+$ ./mvnw package
+----
+
+== Reproduce
+
+You can reproduce the problem with any JRE > 17.
+Let's assume that you have such jre in `/usr/tools/jre21`.
+
+[source,shell]
+----
+$ ./mvnw exec:exec -Dexec.java.home=/usr/tools/jre21
+----
+
+This should produce the following output:
+
+[source]
+----
+[INFO] Scanning for projects...
+[INFO]
+[INFO] --------------------< com.example:demo-jep247-jre >---------------------
+[INFO] Building demo-jep247-jre 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- exec:3.3.0:exec (default-cli) @ demo-jep247-jre ---
+SLF4J(I): Connected with provider of type [ch.qos.logback.classic.spi.LogbackServiceProvider]
+Using compiler options:
+[-d, /var/folders/hn/7bzmb6w56w3550705qmk6m4m0000gn/T/test11724414663421089361/classes, --release, 17]
+Using source files:
+[/var/folders/hn/7bzmb6w56w3550705qmk6m4m0000gn/T/test11724414663421089361/source/com/example/Dummy.java]
+Exception:
+java.lang.NullPointerException: Cannot invoke "java.nio.file.FileSystem.getPath(String, String[])" because "this.fs" is null
+	at org.eclipse.jdt.internal.compiler.batch.ClasspathJep247Jdk12.findClass(ClasspathJep247Jdk12.java:96)
+	at org.eclipse.jdt.internal.compiler.batch.ClasspathJsr199.findClass(ClasspathJsr199.java:83)
+	at org.eclipse.jdt.internal.compiler.batch.FileSystem.internalFindClass(FileSystem.java:508)
+	at org.eclipse.jdt.internal.compiler.batch.FileSystem.findClass(FileSystem.java:439)
+	at org.eclipse.jdt.internal.compiler.batch.FileSystem.findType(FileSystem.java:598)
+	at org.eclipse.jdt.internal.compiler.env.IModuleAwareNameEnvironment.findType(IModuleAwareNameEnvironment.java:101)
+	at org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment.createPlainPackage(LookupEnvironment.java:1170)
+	at org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope.buildTypeBindings(CompilationUnitScope.java:138)
+	at org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment.buildTypeBindings(LookupEnvironment.java:517)
+	at org.eclipse.jdt.internal.compiler.Compiler.internalBeginToCompile(Compiler.java:875)
+	at org.eclipse.jdt.internal.compiler.Compiler.beginToCompile(Compiler.java:393)
+	at org.eclipse.jdt.internal.compiler.Compiler.compile(Compiler.java:447)
+	at org.eclipse.jdt.internal.compiler.Compiler.compile(Compiler.java:425)
+	at org.eclipse.jdt.internal.compiler.batch.Main.performCompilation(Main.java:4710)
+	at org.eclipse.jdt.internal.compiler.tool.EclipseCompilerImpl.call(EclipseCompilerImpl.java:100)
+	at org.eclipse.jdt.internal.compiler.tool.EclipseCompiler$1.call(EclipseCompiler.java:196)
+	at com.example.demo.DemoJep247JreApplication.compile(DemoJep247JreApplication.java:37)
+	at com.example.demo.DemoJep247JreApplication.main(DemoJep247JreApplication.java:104)
+Compiler output:
+Cannot invoke "java.nio.file.FileSystem.getPath(String, String[])" because "this.fs" is null
+
+Exception in thread "main" java.lang.IllegalStateException: Unable to compile source
+	at com.example.demo.DemoJep247JreApplication.compile(DemoJep247JreApplication.java:42)
+	at com.example.demo.DemoJep247JreApplication.main(DemoJep247JreApplication.java:104)
+[ERROR] Command execution failed.
+org.apache.commons.exec.ExecuteException: Process exited with an error: 1 (Exit value: 1)
+    at org.apache.commons.exec.DefaultExecutor.executeInternal (DefaultExecutor.java:355)
+    at org.apache.commons.exec.DefaultExecutor.execute (DefaultExecutor.java:253)
+    at org.codehaus.mojo.exec.ExecMojo.executeCommandLine (ExecMojo.java:884)
+    at org.codehaus.mojo.exec.ExecMojo.executeCommandLine (ExecMojo.java:844)
+    at org.codehaus.mojo.exec.ExecMojo.execute (ExecMojo.java:450)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)
+    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)
+    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:77)
+    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke (Method.java:569)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+----
+
+
